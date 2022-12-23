@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,11 +11,23 @@ using System.Windows.Forms;
 
 namespace GTO
 {
-    public partial class Form1 : Form
+    public partial class mainForm : Form
     {
-        public Form1()
+        
+        public mainForm()
         {
             InitializeComponent();
         }
+
+        private void mainForm_Load(object sender, EventArgs e)
+        {
+            Cfg.loadConfig(this);            
+        }
+        
+
+        private void mainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Cfg.saveConfig(this);
+        }       
     }
 }
