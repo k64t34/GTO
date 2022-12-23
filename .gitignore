@@ -1,0 +1,6 @@
+*.bak
+desktop.ini
+*.bak
+/GTO/.vs/* 
+/GTO/obj/*
+/GTO/bin/*
