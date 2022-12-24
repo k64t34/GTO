@@ -4,3 +4,6 @@ desktop.ini
 /GTO/.vs/* 
 /GTO/obj/*
 /GTO/bin/*
+/wget/.vs/* 
+/wget/obj/*
+/wget/bin/*
