@@ -16,7 +16,7 @@ namespace wget
         static void Main(string[] args)
         {
             //string url = "http://hashcode.ru";
-            string url = "http://google.ru";
+            string url = "https://sd.cdu.so/sd/services/rest/check-status";
             //string url = "http://yafg.fgru";
             string correctAnswer = "Operation completed successfully";
             Console.WriteLine("Start");
