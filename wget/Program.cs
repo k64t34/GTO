@@ -16,22 +16,46 @@ namespace wget
         static void Main(string[] args)
         {
             //string url = "http://hashcode.ru";
-            string url = "https://sd.cdu.so/sd/services/rest/check-status";
+            //string url = "https://sd.cdu.so/sd/services/rest/check-status";
             //string url = "http://yafg.fgru";
+            string url = "http://ya.ru/";
             string correctAnswer = "Operation completed successfully";
-            Console.WriteLine("Start");
+            Console.WriteLine("Start check service REST API ");
+            Console.WriteLine("Connect to {0}",url);
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             HttpWebResponse response;// = (HttpWebResponse)request.GetResponse();            
             try
             {                
-                response = (HttpWebResponse)request.GetResponse();                
+                response = (HttpWebResponse)request.GetResponse();
+            switch (response.StatusCode)
+               {
+           case HttpStatusCode.OK:        //HTTP 200 - всё ОК
+               Console.WriteLine("HTTP 200 OK");
+               break;
+           case HttpStatusCode.Forbidden: //HTTP 403 - доступ запрещён
+               Console.WriteLine("HTTP 403 доступ запрещён");
+               break;
+           case HttpStatusCode.NotFound:  //HTTP 404 - документ не найден
+               Console.WriteLine("HTTP 404 документ не найден");
+               break;
+           case HttpStatusCode.Moved:     //HTTP 301 - документ перемещён
+               Console.WriteLine("HTTP 301  документ перемещён");
+               break;
+           default:                       //другие ошибки
+               Console.WriteLine("HTTP XXX другие ошибки");
+               break;
+            }                
                 Stream stream = response.GetResponseStream();
                 StreamReader sr = new StreamReader(stream, Encoding.GetEncoding(response.CharacterSet));
                 string sReadData = sr.ReadToEnd();
-                /*Console.WriteLine("---------------------------------------");
-                Console.WriteLine("Получено байт {0}",sReadData.Length);
-                Console.WriteLine(sReadData.ToString());
-                Console.WriteLine("---------------------------------------");*/
+                Console.WriteLine("Get {0} bytes {1} charset {2}", sReadData.Length, response.ContentType, response.CharacterSet);
+                int Start_Position = 0, End_Position = sReadData.Length;
+                int linewidth = 77;
+                if (End_Position>linewidth)
+                    Console.WriteLine("{0}...",sReadData.Substring(0, linewidth));
+                else
+                    Console.WriteLine(sReadData);
+
                 #region RegExpression
                 //Использование регулярных выражений
                 //[^>] =любой символ кроме > Жадная и ленивая квантификация https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F
@@ -44,34 +68,51 @@ namespace wget
                 //Regex rowRegex = new Regex("<tr[^>]*?>(?<rowContent>((?!</tr>).)*)</tr>",                
                 //my work Regex body = new Regex(@"<body[^>]*>([^<]*<[^>]*>[^<]*)*<\/body>", RegexOptions.IgnoreCase);
 
-                int Start_Position=0, End_Position=0;
+
                 Regex bodyRegex = new Regex(@"<body[^>]*>", RegexOptions.IgnoreCase); //https://learn.microsoft.com/ru-ru/dotnet/api/system.text.regularexpressions.matchcollection?view=net-7.0
                 MatchCollection matches = bodyRegex.Matches(sReadData);
-                if (matches.Count > 0) 
-                {
+                string bodyText = sReadData; 
+                if (matches.Count > 0)
+                {                    
                     Start_Position = matches[0].Index + matches[0].Length;
+                    Console.WriteLine("start body tag found in position {0}/{1}", Start_Position,sReadData.Length);
                     bodyRegex = new Regex(@"<\/body>", RegexOptions.IgnoreCase);
                     matches = bodyRegex.Matches(sReadData);
-                    if (matches.Count > 0) 
+                    if (matches.Count > 0)
                     {
-                        End_Position = matches[0].Index- Start_Position;
-                        if (End_Position > 0)
-                        {
-                            string bodyText = sReadData.Substring(Start_Position, End_Position);
-                            Console.WriteLine("body={0}",bodyText);
-                            Console.WriteLine("coorect answer={0}",correctAnswer);
-                            if (string.Compare(bodyText, correctAnswer, StringComparison.OrdinalIgnoreCase) == 0) //https://learn.microsoft.com/ru-ru/dotnet/api/system.string.compare?view=net-7.0#system-string-compare(system-string-system-string)
-                            {
-                                Console.WriteLine("OK");
-                            }
-                            else
-                            {
-                                Console.WriteLine("FAIL");                            
-                            }
-                        }
+                        Console.WriteLine("end body tag found in position   {0}/{1}", matches[0].Index, sReadData.Length);
+                        End_Position = matches[0].Index - Start_Position;
+                    }
+                    else
+                        Console.WriteLine("end body tag not found");
+                        End_Position = sReadData.Length - Start_Position;
+                    
+                    if (End_Position > 0)
+                    {
+                        bodyText = sReadData.Substring(Start_Position, End_Position);
                     }
                 }
+                else
+                    Console.WriteLine("start body tag not found ");
                 #endregion
+                Console.WriteLine("Correct answer = {0}", correctAnswer);
+                Console.Write("Compare text   = ");
+                if (bodyText.Length > linewidth)
+                    Console.WriteLine("{0}...", bodyText.Substring(0, linewidth));
+                else
+                    Console.WriteLine(bodyText);
+
+                
+                if (string.Compare(bodyText, correctAnswer, StringComparison.OrdinalIgnoreCase) == 0) //https://learn.microsoft.com/ru-ru/dotnet/api/system.string.compare?view=net-7.0#system-string-compare(system-string-system-string)
+                {
+                    Console.WriteLine("Service REST API is OK");
+                }
+                else
+                {
+                    Console.WriteLine("Service REST API is FAIL");
+                }
+
+
 
 
 
@@ -117,7 +158,7 @@ namespace wget
                     Console.WriteLine("HTTP XXX другие ошибки");
                     break;
             }*/            
-            Console.WriteLine("Finish");
+            Console.WriteLine("Finish check");
             Console.ReadKey();
         }
     }
